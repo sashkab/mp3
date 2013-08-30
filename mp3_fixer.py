@@ -11,7 +11,10 @@ import eyed3.mp3
 
 VERSION = "0.1"
 ENCODING = ['cp1251', 'koi8-r']
+
 # TODO: add tests
+# TODO: delete v1 tags, and save v2 tas only. 
+# TODO: generate some statistics (???)
 
 # Why I wrote this? Why didn't I use something already out there? Here is reason: 
 # 1. Couple scripts I found were incredibly hard to read and undestand logic. 
@@ -30,8 +33,8 @@ ENCODING = ['cp1251', 'koi8-r']
 # formatter = logging.Formatter('%(levelname)s: %(message)s')
 # console_handler = logging.StreamHandler()
 # console_handler.setFormatter(formatter)
-logger = logging.getLogger('mp3')
-# logger.addHandler(console_handler)
+log = logging.getLogger('mp3')
+# log.addHandler(console_handler)
 
 
 def is_ascii(s):
@@ -50,7 +53,8 @@ def fix_encoding(s, encoding):
             fixed = s.encode('latin-1').decode(encoding)
         else:
             fixed = s
-        logger.info(" Converting '%s' into '%s'.", s, fixed)
+        if fixed != s:
+            log.info(" Converting '%s' into '%s'.", s, fixed)
         return fixed
 
 
@@ -63,23 +67,23 @@ def process_folder(dir_name, encoding, dry_run):
             files.append(os.path.join(r, f))
     for file in files:
         if eyed3.mp3.isMp3File(file):
-            logger.info("Processing file '%s'..." % (file))
+            log.info("Processing file '%s'..." % (file))
             f = eyed3.load(file)
             if f.tag:
-                logger.info(" Tag version: %s", eyed3.id3.versionToString(f.tag.version))
+                log.info(" Tag version: %s", eyed3.id3.versionToString(f.tag.version))
                 # TODO: go and fix *ALL* tags, not just three.
                 f.tag.album = fix_encoding(f.tag.album, encoding)
                 f.tag.artist = fix_encoding(f.tag.artist, encoding)
                 f.tag.title = fix_encoding(f.tag.title, encoding)
                 if not dry_run:
                     f.tag.save(encoding='utf-8', version=eyed3.id3.ID3_V2_4)
-                    logger.info(" Saving file.")
-                logger.info("Completed processing file '%s'.", file)
+                    log.info(" Saving file.")
+                log.info("Completed processing file '%s'.", file)
 
             else:
-                logger.warn(' No tags found.')
+                log.warn(' No tags found.')
         else:
-            logger.warn("File '%s' is not mp3 file.", file)
+            log.warn("File '%s' is not mp3 file.", file)
 
 
 if __name__ == '__main__':
@@ -93,16 +97,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.debug:
-        logger.setLevel(logging.DEBUG)
+        log.setLevel(logging.DEBUG)
     else:
-        logger.setLevel(logging.INFO)
+        log.setLevel(logging.INFO)
 
-    logger.debug('Dir: %s', args.dir)
-    logger.debug('dry-run: %s', args.dry_run)
-    logger.debug('encoding: %s', args.encoding)
+    log.debug('Dir: %s', args.dir)
+    log.debug('dry-run: %s', args.dry_run)
+    log.debug('encoding: %s', args.encoding)
 
     if os.path.exists(args.dir):
-        logger.info("Processing folder '%s'", args.dir)
+        log.info("Processing folder '%s'", args.dir)
         process_folder(args.dir, args.encoding, args.dry_run)
     else:
-        logger.info("Error: folder '{}' not found.", args.dir)
+        log.info("Error: folder '%s' not found.", args.dir)
