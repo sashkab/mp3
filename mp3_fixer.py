@@ -65,7 +65,7 @@ def process_folder(dir_name, encoding, dry_run):
             f = eyed3.load(file)
             if f.tag:
                 logger.info(" Tag version: %s", eyed3.id3.versionToString(f.tag.version))
-                # TODO: go and fix *ALL* tags, not just three above.
+                # TODO: go and fix *ALL* tags, not just three.
                 f.tag.album = fix_encoding(f.tag.album, encoding)
                 f.tag.artist = fix_encoding(f.tag.artist, encoding)
                 f.tag.title = fix_encoding(f.tag.title, encoding)
