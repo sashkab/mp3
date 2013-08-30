@@ -31,10 +31,15 @@ Then run `./mp3_fixer.py --help` to get help.
 
 ## Help
 
-    -h, --help           show this help message and exit
-    --dir DIR            Folder containing mp3 files to convert
-    --dry-run            Don't write changes to disk
-    --encoding ENCODING  Encoding of the tags in your mp3 files
-    --debug              Show debug output
+    positional arguments:
+      dir                  Folder with mp3 files to fix.
+
+    optional arguments:
+     -h, --help           show this help message and exit
+     --debug              Show debug output
+     --dry-run            Don't write changes to disk.
+     --encoding ENCODING  Encoding of the tags in your mp3 files.
+     -v, --version        show program's version number and exit
+
 
 Possible encodings are cp1251, koi8-r
