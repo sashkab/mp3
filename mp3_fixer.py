@@ -7,7 +7,9 @@ import fnmatch
 import logging
 
 import eyed3
+import eyed3.mp3
 
+# TODO: add tests
 
 # Why I wrote this? Why didn't I use something already out there? Here is reason: 
 # 1. Couple scripts I found were incredibly hard to read and undestand logic. 
@@ -41,12 +43,13 @@ def fix_encoding(s, encoding):
     """Fixes encoding. It does some magic. :-) 
     Thanks going to this StackOverflow thred: http://stackoverflow.com/a/14168052/881330
     """
-    if is_ascii(s):
-        fixed = s.encode('latin-1').decode(encoding)
-    else:
-        fixed = s
-    logger.info(" Converting '%s' into '%s'.", s, fixed)
-    return fixed
+    if s:
+        if is_ascii(s):
+            fixed = s.encode('latin-1').decode(encoding)
+        else:
+            fixed = s
+        logger.info(" Converting '%s' into '%s'.", s, fixed)
+        return fixed
 
 
 def process_folder(dir_name, encoding, dry_run):
@@ -57,21 +60,24 @@ def process_folder(dir_name, encoding, dry_run):
         for f in fnmatch.filter(fl, '*.mp3'):
             files.append(os.path.join(r, f))
     for file in files:
-        logger.info("Processing file '%s'..." % (file))
-        f = eyed3.load(file)
-        if f.tag:
-            logger.info(" Tag version: %s", eyed3.id3.versionToString(f.tag.version))
-            f.tag.album = fix_encoding(f.tag.album, encoding)
-            f.tag.artist = fix_encoding(f.tag.artist, encoding)
-            f.tag.title = fix_encoding(f.tag.title, encoding)
-            # TODO: go and fix *ALL* tags, not just three above. 
-            if not dry_run:
-                f.tag.save(encoding='utf-8', version=eyed3.id3.ID3_V2_4)
-                logger.info(" Saving file.")
-            logger.info("Completed processing file '%s'.", file)
+        if eyed3.mp3.isMp3File(file):
+            logger.info("Processing file '%s'..." % (file))
+            f = eyed3.load(file)
+            if f.tag:
+                logger.info(" Tag version: %s", eyed3.id3.versionToString(f.tag.version))
+                # TODO: go and fix *ALL* tags, not just three above.
+                f.tag.album = fix_encoding(f.tag.album, encoding)
+                f.tag.artist = fix_encoding(f.tag.artist, encoding)
+                f.tag.title = fix_encoding(f.tag.title, encoding)
+                if not dry_run:
+                    f.tag.save(encoding='utf-8', version=eyed3.id3.ID3_V2_4)
+                    logger.info(" Saving file.")
+                logger.info("Completed processing file '%s'.", file)
 
+            else:
+                logger.warn(' No tags found.')
         else:
-            logger.warn(' No tags found.')
+            logger.warn("File '%s' is not mp3 file.", file)
 
 
 if __name__ == '__main__':
