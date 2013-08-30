@@ -10,6 +10,7 @@ import eyed3
 import eyed3.mp3
 
 VERSION = "0.1"
+ENCODING = ['cp1251', 'koi8-r']
 # TODO: add tests
 
 # Why I wrote this? Why didn't I use something already out there? Here is reason: 
@@ -86,7 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('dir', help='Folder with mp3 files to fix.')
     parser.add_argument('--debug', action='store_true', help='Show debug output')
     parser.add_argument('--dry-run', action='store_true', default=False, help='Don\'t write changes to disk.')
-    parser.add_argument('--encoding', default='cp1251', help='Encoding of the tags in your mp3 files.')
+    parser.add_argument('--encoding', default='cp1251', choices=ENCODING, help='Encoding of the tags in your mp3 files.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {}'.format(VERSION))
 
     args = parser.parse_args()
